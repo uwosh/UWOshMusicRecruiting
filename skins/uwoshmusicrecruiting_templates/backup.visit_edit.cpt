@@ -1,0 +1,435 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xml:lang="en"
+      lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="plone">
+
+  <metal:head define-macro="topslot">
+  </metal:head>
+  
+  <metal:head define-macro="javascript_head">
+	<script>
+		function toggle_show_hide(element_type){
+			var form_element = document.getElementById(element_type + '_add_form');
+			var button_element = document.getElementById('button_add_' + element_type);
+			if(form_element.style['display'] == 'none'){
+				form_element.style['display'] = 'block';
+				button_element.value = ' Close Add Form';
+			}else if(form_element.style['display'] = 'block'){
+				form_element.style['display'] = 'none';
+				button_element.value = ' Add ' + element_type;
+			}
+		}
+	</script>
+  </metal:head>
+
+  <body>
+        <!-- header, h1 of Edit <Type>, schemata links and webdav lock message -->
+        <metal:header define-macro="header">
+
+        </metal:header>
+        
+        <!-- typedesription, typeDescription from the content type -->
+        <metal:typedescription define-macro="typedescription">
+
+        </metal:typedescription>
+
+        <!-- body, editform , fields, buttons, the default macro 
+             contains a number of slots which usually provide enough
+             ways to customise so often I use that macro and just 
+             fill the slots
+        -->
+        <metal:body define-macro="body">
+            <metal:default_body use-macro="here/edit_macros/macros/body">
+				
+              <!-- inside the fieldset but above all the fields -->
+              <metal:block fill-slot="extra_top">
+              </metal:block>
+              
+              <!-- listing of the fields, usually I won't customise this...  Can't figure out how to detect field being added -->
+              <metal:block fill-slot="widgets">
+
+				<!-- Adding A School -->
+				<input 	id="button_add_school"			onclick="toggle_show_hide('school');"
+						class="context" 				type="button" 
+						name="form.button.addSchool" 	value=" Add School" />
+				<div style="display:none" id="school_add_form">
+					<div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-title">
+					          <span></span>
+					          <label for="title">School Name</label>
+					          <span class="fieldRequired" title="Required">
+					            (Required)
+					          </span>
+					          <div class="formHelp" id="title_help"></div>
+
+					            <input type="text" name="title" id="title"
+					                   value="" size="30" tabindex="0"
+					                   maxlength="255" />
+
+					</div>
+				</div>
+				<metal:fieldMacro use-macro="python:here.widget('schools', mode='edit')"/> 
+				
+				<!-- Adding a student -->
+				<input 	id="button_add_student" 			class="context" 
+						type="button" 						name="form.button.addStudent" 
+						value="Add Student" 				onclick="toggle_show_hide('student');"/>
+				<div style="display:none" id="student_add_form">
+					<div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-title">
+					          <span></span>
+					          <label for="title">Student Name</label>
+					          <span class="fieldRequired" title="Required">
+					            (Required)
+					          </span>
+					          <div class="formHelp" id="title_help"></div>
+
+
+
+					            <input type="text" name="title" id="title"
+					                   value="" size="30" tabindex="0"
+					                   maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-phone">
+					          <span></span>
+					          <label for="phone">Phone</label>
+
+					          <div class="formHelp" id="phone_help"></div>
+
+
+
+					            <input type="text" name="phone" id="phone"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-email">
+					          <span></span>
+					          <label for="email">Email</label>
+
+					          <div class="formHelp" id="email_help"></div>
+
+
+
+					            <input type="text" name="email" id="email"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-instrument">
+					          <span></span>
+					          <label for="instrument">Instrument</label>
+
+					          <div class="formHelp" id="instrument_help"></div>
+
+
+
+					            <input type="text" name="instrument"
+					                   id="instrument" value="" size="30"
+					                   maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-adress">
+					          <span></span>
+					          <label for="adress">Adress</label>
+
+					          <div class="formHelp" id="adress_help"></div>
+
+
+
+					            <input type="text" name="adress" id="adress"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-city">
+					          <span></span>
+					          <label for="city">City</label>
+
+					          <div class="formHelp" id="city_help"></div>
+
+
+
+					            <input type="text" name="city" id="city"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-state">
+					          <span></span>
+					          <label for="state">State</label>
+
+					          <div class="formHelp" id="state_help"></div>
+
+
+
+					            <input type="text" name="state" id="state"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesIntegerWidget"
+					             id="archetypes-fieldname-zip">
+					          <span></span>
+					          <label for="zip">Zip</label>
+
+					          <div class="formHelp" id="zip_help"></div>
+
+
+
+					            <input type="text" name="zip" size="5"
+					                   maxlength="255" id="zip" />
+
+					        </div>
+							<script>
+								    // this function turns a checkbox into a radio button... sort of
+								    function toggle_boolean(visibleCheckbox, hiddenBoolean) {
+								    vis = document.getElementById(visibleCheckbox);
+								    hidden = document.getElementById(hiddenBoolean);
+								    if (vis.checked) {
+								    hidden.value = 1;
+								    } else {
+								    hidden.value = 0;
+								    }
+								    return true;
+								    }
+								  </script>
+
+
+							        <div class="field ArchetypesBooleanWidget"
+							             id="archetypes-fieldname-isCommittedToAttend">
+
+
+
+								  <input class="noborder" type="checkbox" value="on"
+							          id="isCommittedToAttend"
+							          name="isCommittedToAttend_visible"
+							          onclick="toggle_boolean('isCommittedToAttend', 'isCommittedToAttend_hidden'); return true" />
+								  <input type="hidden" name="isCommittedToAttend" value="0"
+							          id="isCommittedToAttend_hidden" />
+
+
+
+							          <label for="isCommittedToAttend">Iscommittedtoattend</label>
+
+							          <div class="formHelp"
+							               id="isCommittedToAttend_help"></div>
+
+
+
+							            <div>
+								</div>
+							</div>
+				</div>
+				<metal:fieldMacro use-macro="python:here.widget('students', mode='edit')"/> 
+					
+				<!-- Adding a contact -->
+				<input 	id="button_add_contact" 			class="context" 
+						type="button" 						name="form.button.addContact" 
+						value=" Add Contact" 				onclick="toggle_show_hide('contact');"/>
+				<div style="display:none" id="contact_add_form">
+					<div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-title">
+					          <span></span>
+					          <label for="title">Contact Name</label>
+					          <span class="fieldRequired" title="Required">
+
+					            (Required)
+					          </span>
+					          <div class="formHelp" id="title_help"></div>
+
+
+
+					            <input type="text" name="title" id="title"
+					                   value="sdfs" size="30" tabindex="0"
+					                   maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-phone">
+					          <span></span>
+					          <label for="phone">Phone</label>
+
+					          <div class="formHelp" id="phone_help"></div>
+
+
+
+
+					            <input type="text" name="phone" id="phone"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-email">
+					          <span></span>
+					          <label for="email">Email</label>
+
+					          <div class="formHelp" id="email_help"></div>
+
+
+
+					            <input type="text" name="email" id="email"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-address">
+					          <span></span>
+					          <label for="address">Address</label>
+
+					          <div class="formHelp" id="address_help"></div>
+
+
+
+					            <input type="text" name="address" id="address"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-city">
+					          <span></span>
+
+					          <label for="city">City</label>
+
+					          <div class="formHelp" id="city_help"></div>
+
+
+
+					            <input type="text" name="city" id="city"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-state">
+					          <span></span>
+					          <label for="state">State</label>
+
+					          <div class="formHelp" id="state_help"></div>
+
+
+
+
+					            <input type="text" name="state" id="state"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesIntegerWidget"
+					             id="archetypes-fieldname-zip">
+					          <span></span>
+					          <label for="zip">Zip</label>
+
+					          <div class="formHelp" id="zip_help"></div>
+
+
+
+					            <input type="text" name="zip" size="5"
+					                   maxlength="255" id="zip" />
+
+					        </div>
+				</div>
+				<metal:fieldMacro use-macro="python:here.widget('contacts', mode='edit')"/> 
+				
+				<!-- Adding a Faculty Member -->
+				<input 	id="button_add_facultymember" 			class="context" 
+						type="button" 							name="form.button.addFacultyMember" 
+						value="Add Faculty Member" 				onclick="toggle_show_hide('facultymember');" />
+				<div style="display:none" id="facultymember_add_form">
+					<div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-title">
+					          <span></span>
+					          <label for="title">Title</label>
+
+					          <span class="fieldRequired" title="Required">
+					            (Required)
+					          </span>
+					          <div class="formHelp" id="title_help"></div>
+
+
+
+					            <input type="text" name="title" id="title"
+					                   value="" size="30" tabindex="0"
+					                   maxlength="255" />
+
+					        </div>
+
+					        <div class="field ArchetypesStringWidget"
+					             id="archetypes-fieldname-email">
+					          <span></span>
+					          <label for="email">Email</label>
+
+
+					          <div class="formHelp" id="email_help"></div>
+
+
+
+					            <input type="text" name="email" id="email"
+					                   value="" size="30" maxlength="255" />
+
+					        </div>
+				</div>
+				<metal:fieldMacro use-macro="python:here.widget('facultymembers', mode='edit')"/>
+					
+				
+				<metal:fieldMacro use-macro="python:here.widget('notes', mode='edit')"/> 
+				<metal:fieldMacro use-macro="python:here.widget('dateOfVisit', mode='edit')"/>
+				
+				
+				<input type="hidden" name="school_added" value="false" />
+				<input type="hidden" name="student_added" value="false" />
+				<input type="hidden" name="contact_added" value="false" />
+				<input type="hidden" name="facultymember_added" value="false" />
+              </metal:block>
+
+<!--
+			  <metal:block fill-slot="widgets"> 
+			  	<metal:fieldMacro use-macro="python:here.widget('contact', mode='edit')"/> 
+			  </metal:block>
+			-->
+			
+              <!-- below the fields above the formControls (hidden fields for refernce stuff is above buttons) -->
+              <metal:block fill-slot="extra_bottom">
+              </metal:block>
+
+              <!-- within the formControls these are the default previous, next, save, cancel buttons -->
+              <metal:block fill-slot="buttons">
+				<input class="context" type="submit"
+				                       name="form_submit" value="Save" />
+				                <input class="standalone" type="submit"
+				                       name="form.button.cancel"
+				                       value="Cancel" />
+              </metal:block>
+
+              <!-- within the formControls a slot for extra buttons -->
+              <metal:block fill-slot="extra_buttons">
+              </metal:block>
+
+            </metal:default_body>
+        </metal:body>
+
+        
+        <!-- footer, by line created date etc. -->
+        <metal:footer define-macro="footer">
+        
+        </metal:footer>
+
+  </body>
+
+</html>

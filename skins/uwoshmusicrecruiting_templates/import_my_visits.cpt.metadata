@@ -1,0 +1,5 @@
+[actions]
+action.success = traverse_to:string:import_visits_action
+
+[validators]
+validators = import_visits_validate

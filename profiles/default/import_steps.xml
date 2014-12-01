@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<import-steps>
+
+<import-step 
+    id="UWOshMusicRecruiting-GS-dependencies" 
+    handler="Products.UWOshMusicRecruiting.setuphandlers.installGSDependencies"
+    title="Dependend GS profiles for UWOshMusicRecruiting"
+    version="2008-02-13T09:19:15.777852">
+   <dependency step="plone-final"/>
+   <dependency step="UWOshMusicRecruiting-QI-dependencies"/>
+   Install Generic Setup profile dependencies for UWOshMusicRecruiting
+ </import-step>
+
+ <import-step 
+    id="UWOshMusicRecruiting-QI-dependencies" 
+    handler="Products.UWOshMusicRecruiting.setuphandlers.installQIDependencies"
+    title="Dependend QI installables for UWOshMusicRecruiting"
+    version="2008-02-13T09:19:15.777852">
+   Install quickinstaller dependencies for UWOshMusicRecruiting
+ </import-step>
+ 
+     
+
+
+ <import-step 
+    id="UWOshMusicRecruiting-Update-RoleMappings" 
+    handler="Products.UWOshMusicRecruiting.setuphandlers.updateRoleMappings"
+    title="Update Workflow role mappings for UWOshMusicRecruiting"
+    version="2008-02-13T09:19:15.777852">
+   <dependency step="UWOshMusicRecruiting-QI-dependencies"/>
+   updates the workflow role mappings for UWOshMusicRecruiting
+ </import-step>
+
+ <import-step 
+    id="UWOshMusicRecruiting-postInstall" 
+    handler="Products.UWOshMusicRecruiting.setuphandlers.postInstall"
+    title="manual coded post-install for UWOshMusicRecruiting"
+    version="2008-02-13T09:19:15.777852">
+   <dependency step="UWOshMusicRecruiting-QI-dependencies"/>
+   manual coded post-install for UWOshMusicRecruiting
+ </import-step>
+
+<!-- ##code-section ADDITIONALSTEPS -->
+<!-- ##/code-section ADDITIONALSTEPS --> 
+
+</import-steps>
+ 

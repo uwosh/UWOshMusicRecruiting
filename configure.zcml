@@ -1,0 +1,16 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:five="http://namespaces.zope.org/five">
+  
+  <include file="profiles.zcml" />
+
+  <!-- ##code-section configure.zcml -->
+  <!-- Include the sub-packages that use their own configure.zcml files. -->
+  <!-- <five:registerPackage package="." initialize=".initialize" /> -->
+
+  <include package=".browser" />
+  <include package=".content" />
+
+  <!-- ##/code-section configure.zcml -->
+
+</configure>

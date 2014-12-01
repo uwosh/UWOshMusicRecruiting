@@ -1,0 +1,136 @@
+<html metal:use-macro="here/main_template/macros/master"
+		xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
+		lang="en-US" i18n:domain="plone">
+
+<metal:css fill-slot="css_slot">
+	<style type="text/css" media="all">
+		.drop_down_spacer{
+				padding: 5px;
+		}
+	</style>
+</metal:css> 
+  
+<div metal:fill-slot="main">
+	<tal:folderContents tal:define="member here/portal_membership/getAuthenticatedMember|nothing;
+									folderContents python: here.queryCatalog({'portal_type':'Visit', 'Creator':member.id})">
+	<tal:listing condition="folderContents">
+
+            <table class="listing"
+                   summary="Content listing"
+                   i18n:attributes="summary summary_content_listing;">
+                <thead>
+                    <tr>
+                        <th class="nosort">&nbsp;<tal:title i18n:translate="listingheader_title"
+                          >Unique Id</tal:title>&nbsp;</th>
+                        <th class="nosort">&nbsp;<tal:title i18n:translate="listingheader_author"
+                          >Instrument</tal:title>&nbsp;</th>
+                        <th class="nosort">&nbsp;<tal:title i18n:translate="listingheader_type"
+                          >Student</tal:title>&nbsp;</th>
+                        <th class="nosort"
+                            >&nbsp;<tal:modified i18n:translate="listingheader_modified"
+                          >School</tal:modified>&nbsp;</th>
+                        <th class="nosort"
+                            >&nbsp;<tal:modified i18n:translate="listingheader_modified"
+                        >Contact</tal:modified>&nbsp;</th>
+                        <th class="nosort"
+                           >&nbsp;<tal:modified i18n:translate="listingheader_modified"
+                          >Faculty</tal:modified>&nbsp;</th>
+                        <th class="nosort"
+                            >&nbsp;<tal:modified i18n:translate="listingheader_modified"
+                          >Date Visited</tal:modified>&nbsp;</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tal:items repeat="item folderContents">
+                    <tr metal:define-macro="listitem"
+                        tal:define="oddrow repeat/item/odd;"
+                        tal:attributes="class python: view.test(oddrow, 'even', 'odd')">
+
+                        <tal:defs define="visit_obj item/getObject|nothing;
+                                          item_url item/getURL|item/absolute_url;
+                                          item_id item/getId|item/id;
+                                          item_title_or_id item/pretty_title_or_id;
+                                          item_description item/Description;
+                                          item_type item/portal_type;
+                                          item_type_title item/getNotes|item/Notes|item/Type;
+                                          item_modified item/ModificationDate;
+                                          item_created item/CreationDate;
+                                          item_type_class python: 'visualIcon contenttype-' + normalizeString(item_type);
+                                          item_wf_state        item/review_state|python: wtool.getInfoFor(item, 'review_state', '');
+                                          item_wf_state_class python:'state-' + normalizeString(item_wf_state);
+                                          item_creator item/Creator;
+                                          item_start item/start/ISO|item/StartDate|nothing;
+                                          item_end item/end/ISO|item/EndDate|nothing;
+                                          student visit_obj/getStudents|nothing;
+                                          student_name student/Title|string:-;
+                                          instrument student/getInstrument|string:-;
+										  faculty visit_obj/getFacultymembers|nothing;
+										  faculty_name faculty/Title|string:-;
+                                          school_obj visit_obj/getSchools|nothing;
+                                          school school_obj/Title|string:-;
+                                          contact visit_obj/getContacts|nothing;
+                                          contact_name contact/Title|string:-;
+                                          date_of_visit visit_obj/getDateOfVisit|string:-;
+                                          ">
+                            <td>
+                                <span tal:attributes="class item_type_class"
+                                      tal:condition="python:item_type != 'Link'">
+                                <a href="#"
+                                   tal:attributes="href python:item_url+'/view';
+                                                   class string:$item_wf_state_class visualIconPadding;
+                                                   title item_description;"
+                                   tal:content="item_title_or_id">
+                                    Item Title
+                                </a>
+                                </span>
+
+                                <tal:to_external condition="python:item_type == 'Link'">
+                                    <span tal:attributes="class item_type_class">
+                                    <a href="#"
+                                       tal:content="item_title_or_id"
+                                       tal:attributes="href item/getRemoteUrl;
+                                                       class string:${item_wf_state_class} visualIconPadding;
+                                                       title item_description;">
+                                        External Link
+                                    </a>
+                                    </span>
+                                </tal:to_external>
+                            </td>
+
+                            <td tal:content="instrument"
+                                i18n:translate="">
+                                Instrument
+                            </td>
+                            <td tal:content="student_name"
+                                i18n:translate="">
+                                Student Name
+                            </td>
+                            <td tal:content="school"
+                                i18n:translate="">
+                                School
+                            </td>
+                            <td tal:content="contact_name"
+                                i18n:translate="">
+                                Faculty Name
+                            </td>
+							<td tal:content="faculty_name"
+                                i18n:translate="">
+                                Contact Name
+                            </td>
+
+                        <td tal:content="python:toLocalizedTime(date_of_visit,long_format=1)">
+                          August 16, 2001 at 23:35:59
+                        </td>
+
+                        </tal:defs>
+                    </tr>
+                    </tal:items>
+                </tbody>
+            </table>
+
+        </tal:listing>
+	</tal:folderContents>
+</div>
+
+</html>

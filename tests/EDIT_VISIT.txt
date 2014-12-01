@@ -1,0 +1,361 @@
+========================
+ UWOshMusicRecruiting Product Tests
+========================
+
+Setting up and logging in
+-------------------------
+
+We use zope.testbrowser to simulate browser interaction in order to show
+the main flow of pages. This is not a true functional test, because we also
+inspect and modify the internal state of the ZODB, but it is a useful way of
+making sure we test the full end-to-end process of creating and modifying
+content.
+
+    >>> from Products.Five.testbrowser import Browser
+	>>> from zope.testbrowser import interfaces
+	>>> from zope.interface.verify import verifyObject
+    >>> browser = Browser()
+    >>> portal_url = self.portal.absolute_url()
+
+The following is useful when writing and debugging testbrowser tests. It lets
+us see error messages properly.
+
+    >>> browser.handleErrors = False
+    >>> self.portal.error_log._ignored_exceptions = ()
+
+We then turn off the various portlets, because they sometimes duplicate links
+and text (e.g. the navtree, the recent recent items listing) that we wish to
+test for in our own views. Having no portlets makes things easier.
+
+    >>> from zope.component import getUtility, getMultiAdapter
+    >>> from plone.portlets.interfaces import IPortletManager
+    >>> from plone.portlets.interfaces import IPortletAssignmentMapping
+
+    >>> left_column = getUtility(IPortletManager, name=u"plone.leftcolumn")
+    >>> left_assignable = getMultiAdapter((self.portal, left_column), IPortletAssignmentMapping)
+    >>> for name in left_assignable.keys():
+    ...     del left_assignable[name]
+
+    >>> right_column = getUtility(IPortletManager, name=u"plone.rightcolumn")
+    >>> right_assignable = getMultiAdapter((self.portal, right_column), IPortletAssignmentMapping)
+    >>> for name in right_assignable.keys():
+    ...     del right_assignable[name]
+
+Finally, we need to log in as the portal owner, i.e. an administrator user. We
+do this from the login page.
+
+    >>> from Products.PloneTestCase.setup import portal_owner, default_password
+
+    >>> browser.open(portal_url + '/login_form?came_from=' + portal_url)
+    >>> browser.getControl(name='__ac_name').value = portal_owner
+    >>> browser.getControl(name='__ac_password').value = default_password
+    >>> browser.getControl(name='submit').click()
+
+	>>> verifyObject(interfaces.IBrowser, browser)
+	True
+
+	>>> "You are now logged in" in browser.contents
+	True
+
+Get Folders
+
+	>>> schools = self.portal['SchoolFolder']
+	>>> contacts = self.portal['ContactFolder']
+	>>> students = self.portal['StudentFolder']
+	>>> faculty = self.portal['FacultyMemberFolder']
+	>>> visits = self.portal['VisitFolder']
+
+    >>> browser.open(portal_url)
+
+Create New Visit
+
+	>>> browser.getLink('Create New Visit').click()
+	>>> open('/tmp/test-output.html', 'w').write(browser.contents)
+	
+	>>> visits = self.portal['VisitFolder']
+	
+	>>> browser.getControl(name='school_title').value = "Some School"
+	
+	>>> browser.getControl(name='contact_title').value = "Some Contact"
+	>>> browser.getControl(name='contact_type').value = "Director"
+	>>> browser.getControl(name='contact_phone').value = "555-5555"
+	>>> browser.getControl(name='contact_email').value = "c@gmail.com"
+	>>> browser.getControl(name='contact_address').value = "1234 road"
+	>>> browser.getControl(name='contact_city').value = 'Oshkosh'
+	>>> browser.getControl(name='contact_state').value = 'WI'
+	>>> browser.getControl(name='contact_zip').value = '54904'
+	>>> browser.getControl(name='contact_isAlumni').value = True
+	
+	>>> browser.getControl(name='student_title').value = "Some Student"
+	>>> browser.getControl(name='student_phone').value = "555-5555"
+	>>> browser.getControl(name='student_email').value = 's@gmail.com'
+	>>> browser.getControl(name='student_instrument').value = 'guitar'
+	>>> browser.getControl(name='student_address').value = '222 street'
+	>>> browser.getControl(name='student_city').value = 'Oshkosh'
+	>>> browser.getControl(name='student_state').value = 'WI'
+	>>> browser.getControl(name='student_zip').value = '54904'
+	>>> browser.getControl(name='isCommittedToAttend').value = True
+	
+	>>> browser.getControl(name='facultymember_email').value = "email@gmail.com"
+	
+	>>> browser.getControl(name='dateOfVisit_year').value = ["2008"]
+	>>> browser.getControl(name='dateOfVisit_month').value = ["03"]
+	>>> browser.getControl(name='dateOfVisit_day').value = ['15']
+	>>> browser.getControl(name='dateOfVisit_hour').value = ['08']
+	>>> browser.getControl(name='dateOfVisit_minute').value = ['30']
+	>>> browser.getControl(name='dateOfVisit_ampm').value = ['AM']
+	
+	>>> browser.getControl(name='notes').value = 'Some Notes'
+	
+	>>> browser.getControl(name='form_submit').click()
+
+Check That all field in Contact were added properly
+	
+	>>> contact = contacts[contacts.objectIds()[0]]
+	>>> contact.Title()
+	'Some Contact'
+	>>> contact.getType()
+	'Director'
+	>>> contact.getPhone()
+	'555-5555'
+	>>> contact.getEmail()
+	'c@gmail.com'
+	>>> contact.getAddress()
+	'1234 road'
+	>>> contact.getCity()
+	'Oshkosh'
+	>>> contact.getState()
+	'WI'
+	>>> contact.getZip()
+	'54904'
+	>>> contact.isAlumni
+	True
+
+Check That all field in Student were added properly
+	
+	>>> student = students[students.objectIds()[0]]
+	>>> student.Title()
+	'Some Student'
+	>>> student.getPhone()
+	'555-5555'
+	>>> student.getEmail()
+	's@gmail.com'
+	>>> student.getAddress()
+	'222 street'
+	>>> student.getCity()
+	'Oshkosh'
+	>>> student.getState()
+	'WI'
+	>>> student.getZip()
+	'54904'
+	>>> student.isCommittedToAttend
+	True
+
+Check that school was added correctly
+	
+	>>> schools[schools.objectIds()[0]].Title()
+	'Some School'
+
+Check that Faculty was added correctly
+
+	>>> faculty[faculty.objectIds()[0]].Title()
+	'portal_owner'
+	>>> faculty[faculty.objectIds()[0]].getEmail()
+	'email@gmail.com'
+	
+Check that visit was added correctly
+
+	>>> visit = visits[visits.objectIds()[0]]
+	>>> visit.getNotes()
+	'<p>Some Notes</p>'
+	>>> print visit.getDateOfVisit()
+	2008/03/15 08:30:00 GMT-5
+
+Now go to edit created visit
+
+	>>> browser.getLink(url='VisitFolder', text="Visits").click()
+	>>> browser.getLink('SomeSchool-SomeStudent-SomeContact-portal_owner').click()
+	>>> browser.getLink('Edit').click()
+	>>> open('/tmp/test-output.html', 'w').write(browser.contents)
+	
+Edit the visit
+---Delete select all drop downs
+
+	>>> browser.getControl(name='schools_drop_down').value = ['']
+	>>> browser.getControl(name='students_drop_down').value = ['']
+	>>> browser.getControl(name='contacts_drop_down').value = ['']
+	
+Create all new student, contact, and school
+
+	>>> browser.getControl(name='school_title').value = "Some Other School"
+	
+	>>> browser.getControl(name='contact_title').value = "Some Other Contact"
+	>>> browser.getControl(name='contact_type').value = "Director"
+	>>> browser.getControl(name='contact_phone').value = "555-5555"
+	>>> browser.getControl(name='contact_email').value = "c@gmail.com"
+	>>> browser.getControl(name='contact_address').value = "1234 road"
+	>>> browser.getControl(name='contact_city').value = 'Oshkosh'
+	>>> browser.getControl(name='contact_state').value = 'WI'
+	>>> browser.getControl(name='contact_zip').value = '54904'
+	>>> browser.getControl(name='contact_isAlumni').value = True
+	
+	>>> browser.getControl(name='student_title').value = "Some Other Student"
+	>>> browser.getControl(name='student_phone').value = "555-5555"
+	>>> browser.getControl(name='student_email').value = 's@gmail.com'
+	>>> browser.getControl(name='student_instrument').value = 'guitar'
+	>>> browser.getControl(name='student_address').value = '222 street'
+	>>> browser.getControl(name='student_city').value = 'Oshkosh'
+	>>> browser.getControl(name='student_state').value = 'WI'
+	>>> browser.getControl(name='student_zip').value = '54904'
+	>>> browser.getControl(name='isCommittedToAttend').value = True
+	
+	>>> browser.getControl(name='facultymember_title').value = 'joe'
+	>>> browser.getControl(name='facultymember_email').value = "email2@gmail.com"
+	
+	>>> browser.getControl(name='dateOfVisit_year').value = ["2009"]
+	>>> browser.getControl(name='dateOfVisit_month').value = ["04"]
+	>>> browser.getControl(name='dateOfVisit_day').value = ['16']
+	>>> browser.getControl(name='dateOfVisit_hour').value = ['09']
+	>>> browser.getControl(name='dateOfVisit_minute').value = ['40']
+	>>> browser.getControl(name='dateOfVisit_ampm').value = ['PM']
+	
+	>>> browser.getControl(name='notes').value = 'Some Other Notes'
+	
+	>>> browser.getControl(name='form_submit').click()
+
+Check that visit was modified correctly
+
+	>>> open('/tmp/test-output.html', 'w').write(browser.contents)
+	
+	>>> visit = self.portal['VisitFolder'][self.portal['VisitFolder'].objectIds()[0]]
+	>>> visit.getNotes()
+	'<p>Some Other Notes</p>'
+	>>> print visit.getDateOfVisit()
+	2009/04/16 21:40:00 GMT-5
+	
+Check That all field in Contact were added properly
+
+	>>> contact = visit.getContacts()
+	>>> contact.Title()
+	'Some Other Contact'
+	>>> contact.getType()
+	'Director'
+	>>> contact.getPhone()
+	'555-5555'
+	>>> contact.getEmail()
+	'c@gmail.com'
+	>>> contact.getAddress()
+	'1234 road'
+	>>> contact.getCity()
+	'Oshkosh'
+	>>> contact.getState()
+	'WI'
+	>>> contact.getZip()
+	'54904'
+	>>> contact.isAlumni
+	True
+
+Check That all field in Student were added properly
+
+	>>> student = visit.getStudents()
+	>>> student.Title()
+	'Some Other Student'
+	>>> student.getPhone()
+	'555-5555'
+	>>> student.getEmail()
+	's@gmail.com'
+	>>> student.getAddress()
+	'222 street'
+	>>> student.getCity()
+	'Oshkosh'
+	>>> student.getState()
+	'WI'
+	>>> student.getZip()
+	'54904'
+	>>> student.isCommittedToAttend
+	True
+
+Check that school was added correctly
+
+	>>> visit.getSchools().Title()
+	'Some Other School'
+
+Check that Faculty was added correctly
+
+	>>> visit.getFacultymembers().Title()
+	'joe'
+	>>> visit.getFacultymembers().getEmail()
+	'email2@gmail.com'
+	
+Now try selecting a different drop down value to edit and see changes take affect
+
+	>>> browser.getLink(url='VisitFolder', text="Visits").click()
+	>>> browser.getLink('SomeOtherSchool-SomeOtherStudent-SomeOtherContact-joe').click()
+	>>> browser.getLink('Edit').click()
+
+Edit the visit
+---Select Drop Down
+
+	>>> browser.getControl(name='schools_drop_down').displayValue = ['Some School']
+	>>> browser.getControl(name='students_drop_down').displayValue = ['Some Student']
+	>>> browser.getControl(name='contacts_drop_down').displayValue = ['Some Contact']
+	>>> browser.getControl(name='facultymembers_drop_down').displayValue = ['portal_owner']
+
+	>>> browser.getControl(name='form_submit').click()
+	
+Check that contact was changed correctly
+
+	>>> visit = self.portal['VisitFolder'][self.portal['VisitFolder'].objectIds()[0]]
+
+	>>> contact = visit.getContacts()
+	>>> contact.Title()
+	'Some Contact'
+	>>> contact.getType()
+	'Director'
+	>>> contact.getPhone()
+	'555-5555'
+	>>> contact.getEmail()
+	'c@gmail.com'
+	>>> contact.getAddress()
+	'1234 road'
+	>>> contact.getCity()
+	'Oshkosh'
+	>>> contact.getState()
+	'WI'
+	>>> contact.getZip()
+	'54904'
+	>>> contact.isAlumni
+	True
+
+Check that student was changed correctly
+
+	>>> student = visit.getStudents()
+	>>> student.Title()
+	'Some Student'
+	>>> student.getPhone()
+	'555-5555'
+	>>> student.getEmail()
+	's@gmail.com'
+	>>> student.getAddress()
+	'222 street'
+	>>> student.getCity()
+	'Oshkosh'
+	>>> student.getState()
+	'WI'
+	>>> student.getZip()
+	'54904'
+	>>> student.isCommittedToAttend
+	True
+
+Check that school was changed correctly
+
+	>>> visit.getSchools().Title()
+	'Some School'
+
+Check that faculty was changed correctly
+
+	>>> visit.getFacultymembers().Title()
+	'portal_owner'
+	>>> visit.getFacultymembers().getEmail()
+	'email@gmail.com'
+	

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<object name="portal_factory" meta_type="Plone Factory Tool">
+ <factorytypes>
+  <type portal_type="stirng"/>
+  <type portal_type="city"/>
+  <type portal_type="Visit"/>
+  <type portal_type="VisitFolder"/>
+  <type portal_type="FacultyMember"/>
+  <type portal_type="FacultyMemberFolder"/>
+  <type portal_type="Student"/>
+  <type portal_type="StudentFolder"/>
+  <type portal_type="School"/>
+  <type portal_type="SchoolFolder"/>
+  <type portal_type="Contact"/>
+  <type portal_type="ContactFolder"/>
+ </factorytypes>
+</object>

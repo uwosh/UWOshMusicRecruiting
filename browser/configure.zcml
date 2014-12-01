@@ -1,0 +1,21 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="UWOshMusicRecruiting">
+
+<include package="plone.app.contentmenu" />
+
+<browser:page
+	for="Products.CMFCore.interfaces.ISiteRoot"
+	name="my-visits"
+	class=".myvisits.MyVisitsView"
+	permission="cmf.AddPortalContent"
+/>
+<browser:page
+    for="Products.CMFCore.interfaces.ISiteRoot"
+    name="my-instruments"
+    class=".myinstruments.MyInstrumentsView"
+    permission="cmf.AddPortalContent"
+/>
+
+</configure>

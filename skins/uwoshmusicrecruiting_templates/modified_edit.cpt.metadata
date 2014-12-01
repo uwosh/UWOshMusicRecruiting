@@ -1,0 +1,9 @@
+[default]
+title = Edit
+
+[actions]
+action.success = traverse_to:string:create_new_visit_action
+action.success..cancel = traverse_to:string:go_back
+
+[validators]
+validators = create_new_visit_validate

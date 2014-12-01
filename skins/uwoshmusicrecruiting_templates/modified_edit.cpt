@@ -1,0 +1,470 @@
+<tal:block metal:define-macro="master"
+           define="view context/@@at_base_edit_view;
+                   dummy python:view.isTemporaryObject() and request.set('disable_border', True);
+                   lifecycle context/@@at_lifecycle_view;
+                   lock_info context/@@plone_lock_info;
+                   dummy lifecycle/begin_edit;
+                   errors options/state/getErrors | nothing;
+                   Iterator python:modules['Products.Archetypes'].IndexIterator;
+                   schematas here/Schemata;
+                   allow_tabbing python: not view.isMultiPageSchema();
+                   fieldsets python:[key for key in schematas.keys() if (schematas[key].editableFields(here, visible_only=True))];
+                   default_fieldset python:(not schematas or schematas.has_key('default')) and 'default' or fieldsets[0];
+                   fieldset request/fieldset|options/fieldset|default_fieldset;
+                   fields python:[f for key in fieldsets for f in schematas[key].editableFields(here)];
+                   dummy python:here.at_isEditable(fields);
+                   portal_type python:here.getPortalTypeName().lower().replace(' ', '_');
+                   type_name here/getPortalTypeName|here/archetype_name;
+                   base_macros here/edit_macros/macros;
+                   edit_template python:'%s_edit' % portal_type;
+                   edit_macros python:path('here/%s/macros | nothing' % edit_template);
+                   header_macro edit_macros/header | header_macro | base_macros/header;
+                   typedescription_macro edit_macros/typedescription | typedescription_macro | base_macros/typedescription;
+                   body_macro context/modified_edit_macros/macros/body | edit_macros/body | body_macro | base_macros/body;
+                   footer_macro edit_macros/footer | footer_macro | base_macros/footer;
+                   isLocked isLocked | lock_info/is_locked_for_current_user;
+                   css python:here.getUniqueWidgetAttr(fields, 'helper_css');
+                   js python:here.getUniqueWidgetAttr(fields, 'helper_js');
+				   all_visits python: context.queryCatalog({'portal_type':'Visit', 'id':here.id});
+				   all_schools python: context.queryCatalog({'portal_type':'School'});
+				   all_students python: context.queryCatalog({'portal_type':'Student'});
+				   all_contacts python: context.queryCatalog({'portal_type':'Contact'});
+			   	   all_facultymembers python: context.queryCatalog({'portal_type':'FacultyMember'});
+				   visit python: len(all_visits) > 0 and all_visits[0];
+				   school_brain python: len(all_visits) > 0 and context.queryCatalog({'portal_type':'School', 'id':visit.getSchools().id})[0];
+				   student_brain python: len(all_visits) > 0 and context.queryCatalog({'portal_type':'Student', 'id':visit.getStudents().id})[0];
+				   contact_brain python: len(all_visits) > 0 and context.queryCatalog({'portal_type':'Contact', 'id':visit.getContacts().id})[0];
+				   faculty_brain python: len(all_visits) > 0 and context.queryCatalog({'portal_type':'School', 'id':visit.getSchools().id})[0];
+				   member here/portal_membership/getAuthenticatedMember|nothing;
+				   user_name member/id|nothing;
+				   user_email python: (member.getProperty('email') or None);
+				   ">
+
+				<html xmlns="http://www.w3.org/1999/xhtml"
+				      xml:lang="en"
+				      lang="en"
+				      xmlns:tal="http://xml.zope.org/namespaces/tal"
+				      xmlns:metal="http://xml.zope.org/namespaces/metal"
+				      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+				      metal:use-macro="here/main_template/macros/master"
+				      i18n:domain="plone">
+
+				  <metal:head fill-slot="top_slot">
+				    <tal:block define="macro edit_macros/topslot | nothing"
+				                    condition="macro">
+				      <metal:block use-macro="macro" />
+				    </tal:block>
+				  </metal:head>
+
+				  <metal:javascript_head fill-slot="javascript_head_slot">
+				    <tal:block define="macro here/archetypes_custom_js/macros/javascript_head | nothing"
+				               condition="macro">
+				      <metal:block use-macro="macro" />
+				    </tal:block>
+				    <tal:js condition="js"
+				            repeat="item js">
+				      <script type="text/javascript"
+				              charset="iso-8859-1"
+				              tal:condition="python:exists('portal/%s' % item)"
+				              tal:attributes="src string:$portal_url/$item">
+				      </script>
+				    </tal:js>
+				    <tal:block define="macro edit_macros/javascript_head | nothing"
+				                    condition="macro">
+				      <metal:block use-macro="macro" />
+				    </tal:block>
+				  </metal:javascript_head>
+
+				  <metal:css fill-slot="css_slot">
+				    <tal:css condition="css"
+				             repeat="item css">
+				      <style type="text/css"
+				             media="all"
+				             tal:condition="python:exists('portal/%s' % item)"
+				             tal:content="structure string:<!-- @import url($portal_url/$item); -->">
+				      </style>
+				    </tal:css>
+				    <tal:block define="macro edit_macros/css | nothing"
+				                    condition="macro">
+				      <metal:block use-macro="macro" />
+				    </tal:block>
+				  </metal:css>
+
+  <body>
+
+    <metal:fill fill-slot="main">
+  <metal:main define-macro="main">
+    <metal:use_header use-macro="header_macro" />
+    <metal:use_typedescription use-macro="typedescription_macro" />
+    <metal:use_body use-macro="body_macro">
+        <metal:widgets metal:fill-slot="widgets">
+            <metal:fieldMacro use-macro="python:here.widget('id', mode='edit')" />
+
+			<fieldset>
+
+
+			<div    tal:attributes="class python:test(error_school_title, 'field error', 'field')"
+				    tal:define="error_school_title errors/school_title|nothing;"
+					tal:condition="error_school_title">
+				<tal:block i18n:translate="" content="error_school_title">
+						Error
+				</tal:block>
+		    </div>
+			
+			<!-- Add School Part -->
+			<dl id="add_school_collapsible" class="collapsible collapsedOnLoad">
+         		<dt class="collapsibleHeader">Add School</dt>
+         		<dd class="collapsibleContent">
+					<div class="field">
+
+						<label for="school_title" i18n:translate="label_school_title">Name</label>
+
+						<input type="text"
+							   id="school_title"
+							   name="school_title"
+							   size="25"
+							   tabindex=""
+							   tal:attributes="
+								   tabindex tabindex/next; value request/school_title|nothing"
+							  />
+
+					</div>
+      			</dd>
+			</dl>
+			
+			<!-- School Drop Down -->
+			<div class="drop_down_spacer">
+				<div class="formHelp">or select school from list</div>
+			
+				<select name="schools_drop_down">
+					<option value=""></option>
+					<tal:block tal:repeat="school all_schools">
+						<option tal:attributes="value school/id; selected string:true" 
+								tal:content="school/Title"
+								tal:condition="python: school_brain and school_brain.id == school.id" >
+							Title
+						</option>
+						<option tal:attributes="value school/id;" 
+								tal:content="school/Title"
+								tal:condition="not: python: school_brain and school_brain.id == school.id" >
+							Title
+						</option>
+					</tal:block>
+				</select>
+			</div>
+			
+			<!-- Add Student -->
+
+			<div    tal:attributes="class python:test(error_student_title, 'field error', 'field')"
+				    tal:define="error_student_title errors/student_title|nothing;"
+					tal:condition="error_student_title">
+				<tal:block i18n:translate="" content="error_student_title">
+						Error
+				</tal:block>
+		    </div>
+			
+			<dl id="add_student_collapsible" class="collapsible collapsedOnLoad">
+         		<dt class="collapsibleHeader">Add Student</dt>
+         		<dd class="collapsibleContent">
+					<div 	class="field ArchetypesStringWidget" id="archetypes-fieldname-student-title">
+													
+							<label 	i18n:translate="label_student_title">Student Name</label>
+							<span 	class="fieldRequired" 	title="Required"
+								i18n:attributes="title"	i18n:translate="label_required">
+								(Required)
+							</span>
+							<div class="formHelp" i18n:translate="label_student_title_help">Enter the name of the Student</div>
+							<input type="text" name="student_title" id="student_title_input" 
+								tal:attributes="tabindex tabindex/next; value request/student_title|nothing" size="20" maxlength="255" />
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-student-phone">
+						<label i18n:translate="label_student_phone">Phone</label>
+
+						<div class="formHelp" id="student_phone_help" i18n:translate="label_student_plone_help">Enter Student's phone number.</div>
+					
+						<input type="text" name="student_phone" id="student_phone_input" 
+							tal:attributes="tabindex tabindex/next; value request/student_phone|nothing" size="15" maxlength="255" />
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-student-email">
+					
+						<label i18n:translate="label_student_email">Email</label>
+
+						<div class="formHelp" id="student_email_help" i18n:translate="label_student_email_help">Enter Student's email</div>
+
+						<input type="text" name="student_email" id="student_email_input" 
+							tal:attributes="tabindex tabindex/next; value request/student_email|nothing" size="20" maxlength="255" />
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-student-instrument">
+						<label i18n:translate="label_student_instrument">Instrument</label>
+
+						<div class="formHelp" id="student_instrument_help" i18n:translate="label_student_instrument_help">Enter Student's instrument</div>
+
+						<input type="text" name="student_instrument" id="student_instrument_input" 
+							tal:attributes="tabindex tabindex/next; value request/student_instrument|nothing" size="15" maxlength="255" />
+
+					</div>
+					
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-student-address">
+						<label i18n:translate="label_student_address">Address</label>
+
+						<div class="formHelp" id="student_address_help" i18n:translate="label_student_address_help">Enter Student's address</div>
+
+						<input type="text" name="student_address" id="student_address_input" 
+							tal:attributes="tabindex tabindex/next; value request/student_address|nothing" size="30" maxlength="255" />
+
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-student-city">
+						<label i18n:translate="label_student_city">City</label>
+
+						<div class="formHelp" id="student_city_help" i18n:translate="label_student_city_help">Enter Student's city</div>
+
+						<input type="text" name="student_city" id="student_city_input" 
+							tal:attributes="tabindex tabindex/next; value request/student_city|nothing" size="15" maxlength="255" />
+
+					</div>
+					
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-student-state">
+						<label i18n:translate="label_student_state">State</label>
+
+						<div class="formHelp" id="student_state_help" i18n:translate="label_student_state_help">Enter Student's state</div>
+
+						<input type="text" name="student_state" id="student_state_input" 
+							tal:attributes="tabindex tabindex/next; value request/student_state|nothing" size="15" maxlength="255" />
+
+					</div>
+					
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-student-zip">
+						<label i18n:translate="label_student_zip">ZIP</label>
+
+						<div class="formHelp" id="student_zip_help" i18n:translate="label_student_zip_help">Enter Student's ZIP</div>
+
+						<input type="text" name="student_zip" id="student_zip_input" 
+							tal:attributes="tabindex tabindex/next; value request/student_zip|nothing" size="5" maxlength="255" />
+
+					</div>
+
+ 					<div class="field ArchetypesBooleanWidget" id="archetypes-fieldname-student-isCommittedToAttend">
+
+						<input class="noborder" type="checkbox" tal:attributes="checked request/isCommittedToAttend|nothing" id="isCommittedToAttend" name="isCommittedToAttend" />
+ 						<label for="isCommittedToAttend">Is Committed To UW Oshkosh</label>
+
+						<div class="formHelp" id="isCommittedToAttend_help" i18n:translate="label_student_isCommittedToAttend">Specify is student is going to attend UWO.</div>
+					</div>				
+				</dd>
+			</dl>
+			
+		    <!-- Student Drop Down -->
+			<div class="drop_down_spacer">
+				<div class="formHelp">or select student from list</div>
+			
+				<select name="students_drop_down" >
+					<option value=""></option>
+					<tal:block tal:repeat="student all_students">
+						<option tal:attributes="value student/id; selected string:true" 
+								tal:content="student/Title"
+								tal:condition="python: student_brain and student_brain.id == student.id" >
+							Title
+						</option>
+						<option tal:attributes="value student/id;" 
+								tal:content="student/Title"
+								tal:condition="not: python: student_brain and student_brain.id == student.id" >
+							Title
+						</option>
+					</tal:block>
+				</select>
+			</div>
+			
+			
+ 			<!-- Add Contact -->
+			<div    tal:attributes="class python:test(error_contact_title, 'field error', 'field')"
+				    tal:define="error_contact_title errors/contact_title|nothing;"
+					tal:condition="error_contact_title">
+				<tal:block i18n:translate="" content="error_contact_title">
+						Error
+				</tal:block>
+		    </div>
+			<dl id="add_contact_collapsible" class="collapsible collapsedOnLoad">
+         		<dt class="collapsibleHeader">Add Contact</dt>
+         		<dd class="collapsibleContent">
+					<div 	class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-title">
+													
+							<label 	i18n:translate="label_contact_title">Contact Name</label>
+							<span 	class="fieldRequired" 	title="Required"
+								i18n:attributes="title"	i18n:translate="label_required">
+								(Required)
+							</span>
+							<div class="formHelp" i18n:translate="label_contact_title_help">Enter the Name of the Contact</div>
+							<input type="text" name="contact_title" id="contact_title_input" 
+								tal:attributes="tabindex tabindex/next; value request/contact_title|nothing" size="20" maxlength="255" />
+					</div>
+					<div 	class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-type">
+													
+							<label 	i18n:translate="label_contact_type">Contact Title</label>
+							
+							<div class="formHelp" i18n:translate="label_contact_name_help">Enter the Title of the Contact</div>
+							<input type="text" name="contact_type" id="contact_name_input" 
+								tal:attributes="tabindex tabindex/next; value request/contact_type|nothing" size="20" maxlength="255" />
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-phone">
+						<label i18n:translate="label_contact_phone">Phone</label>
+
+						<div class="formHelp" id="contact_phone_help" i18n:translate="label_contact_phone_help">Enter Contact's phone number.</div>
+					
+						<input type="text" name="contact_phone" id="contact_phone_input" 
+							tal:attributes="tabindex tabindex/next; value request/contact_phone|nothing" size="15" maxlength="255" />
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-email">
+					
+						<label i18n:translate="label_contact_email">Email</label>
+
+						<div class="formHelp" id="contact_email_help" i18n:translate="label_contact_email_help">Enter Contact's email</div>
+
+						<input type="text" name="contact_email" id="contact_email_input" 
+							tal:attributes="tabindex tabindex/next; value request/contact_email|nothing" size="20" maxlength="255" />
+					</div>
+					
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-address">
+						<label i18n:translate="label_contact_address">Address</label>
+
+						<div class="formHelp" id="contact_address_help" i18n:translate="label_contact_address_help">Enter Contact's address</div>
+
+						<input type="text" name="contact_address" id="contact_address_input" 
+							tal:attributes="tabindex tabindex/next; value request/contact_address|nothing" size="30" maxlength="255" />
+
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-city">
+						<label i18n:translate="label_contact_city">City</label>
+
+						<div class="formHelp" id="contact_city_help" i18n:translate="label_contact_city_help">Enter Contact's city</div>
+
+						<input type="text" name="contact_city" id="contact_city_input" 
+							tal:attributes="tabindex tabindex/next; value request/contact_city|nothing" size="15" maxlength="255" />
+
+					</div>
+					
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-state">
+						<label i18n:translate="label_contact_state">State</label>
+
+						<div class="formHelp" id="student_contact_help" i18n:translate="label_contact_state_help">Enter Contact's state</div>
+
+						<input type="text" name="contact_state" id="contact_state_input" 
+							tal:attributes="tabindex tabindex/next; value request/contact_state|nothing" size="15" maxlength="255" />
+
+					</div>
+					
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-contact-zip">
+						<label i18n:translate="label_contact_zip">ZIP</label>
+
+						<div class="formHelp" id="contact_zip_help" i18n:translate="label_contact_zip_help">Enter Contact's ZIP</div>
+
+						<input type="text" name="contact_zip" id="contact_zip_input" 
+							tal:attributes="tabindex tabindex/next; value request/contact_zip|nothing" size="5" maxlength="255" />
+
+					</div>
+					<div class="field ArchetypesBooleanWidget" id="archetypes-fieldname-contact-isAlumni">
+
+						<input class="noborder" type="checkbox" tal:attributes="checked request/contact_isAlumni|nothing" id="contact_isAlumni" name="contact_isAlumni" />
+ 						<label for="isCommittedToAttend">Is Contact Alumni?</label>
+
+						<div class="formHelp" id="isCommittedToAttend_help" i18n:translate="label_student_isCommittedToAttend">Specify if the contact formerly attended UW Oshkosh.</div>
+					</div>
+				</dd>
+			</dl>	
+			
+			<!-- Contact Drop Down -->
+			<div class="drop_down_spacer">
+				<div class="formHelp">or select contact from list</div>
+				<select name="contacts_drop_down" >
+					<option value=""></option>
+					<tal:block tal:repeat="contact all_contacts">
+						<option tal:attributes="value contact/id; selected string:true" 
+								tal:content="contact/Title"
+								tal:condition="python: contact_brain and contact_brain.id == contact.id" >
+							Title
+						</option>
+						<option tal:attributes="value contact/id;" 
+								tal:content="contact/Title"
+								tal:condition="not: python: contact_brain and contact_brain.id == contact.id" >
+							Title
+						</option>
+					</tal:block>
+				</select>
+		    </div>
+			
+			<!-- Add Faculty Member -->
+			<div    tal:attributes="class python:test(error_facultymember_title, 'field error', 'field')"
+				    tal:define="error_facultymember_title errors/facultymember_title|nothing;"
+					tal:condition="error_facultymember_title">
+				<tal:block i18n:translate="" content="error_facultymember_title">
+						Error
+				</tal:block>
+		    </div>
+			<dl id="add_facultymember_collapsible" class="collapsible collapsedOnLoad">
+         		<dt class="collapsibleHeader">Add Faculty Member</dt>
+         		<dd class="collapsibleContent">
+					<div 	class="field ArchetypesStringWidget" id="archetypes-fieldname-facultymember-title">
+													portal_memberdata
+							<label 	i18n:translate="label_facultymember_title">Faculty Member Name</label>
+							<span 	class="fieldRequired" 	title="Required"
+								i18n:attributes="title"	i18n:translate="label_required">
+								(Required)
+							</span>
+							<div class="formHelp" i18n:translate="label_facultymember_title_help">Enter the name of the Faculty Member</div>
+							<input type="text" name="facultymember_title" id="facultymember_title_input" 
+								tal:attributes="tabindex tabindex/next; value request/facultymember_title|user_name|nothing" size="20" maxlength="255" />
+					</div>
+
+					<div class="field ArchetypesStringWidget" id="archetypes-fieldname-facultymember-email">
+						<label i18n:translate="label_facultymember_email">Email</label>
+
+						<div class="formHelp" id="contact_facultymember_help" i18n:translate="label_facultymember_email_help">Enter Faculty Member's email.</div>
+					
+						<input type="text" name="facultymember_email" id="facultymember_email_input" 
+							tal:attributes="tabindex tabindex/next; value request/facultymember_email|user_email|nothing" size="20" maxlength="255" />
+					</div>
+				</dd>
+			</dl>
+
+    		<!-- Faculty Member Drop Down -->
+			<div class="drop_down_spacer">
+				<div class="formHelp">or select faculty member from list</div>
+				<select name="facultymembers_drop_down">
+					<option value="">(Defaults to Current User)</option>	
+					<tal:block tal:repeat="faculty all_facultymembers">			
+						<option tal:attributes="value faculty/id; selected string:true" 
+								tal:content="faculty/Title"
+								tal:condition="python: faculty_brain and faculty_brain.id == faculty.id" >
+							Title
+						</option>
+						<option tal:attributes="value faculty/id;" 
+								tal:content="faculty/Title"
+								tal:condition="not: python: faculty_brain and faculty_brain.id == faculty.id" >
+							Title
+						</option>
+					</tal:block>
+				</select>
+		    </div>
+			
+			<br />
+			
+			<metal:calendarMacro use-macro="python:here.widget('dateOfVisit', mode='edit')" /> 
+			<metal:notesMacro use-macro="python:here.widget('notes', mode='edit')" />
+			
+		</fieldset>
+        </metal:widgets>
+    </metal:use_body>
+    <metal:use_footer use-macro="footer_macro" />
+  </metal:main>
+</metal:fill>
+
+  </body>
+
+</html>
+</tal:block>

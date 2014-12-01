@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<object name="portal_workflow" meta_type="Plone Workflow Tool">
+ <object name="UWOshMusicRecruitingWorkFlow" meta_type="Workflow"/>
+ <bindings>
+  <type type_id="Contact">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="ContactFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="FacultyMember">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="FacultyMemberFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="School">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="SchoolFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="Student">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="StudentFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="Visit">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="VisitFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="Visit">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="VisitFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="FacultyMember">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="FacultyMemberFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="Student">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="StudentFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="School">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="SchoolFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="Contact">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+  <type type_id="ContactFolder">
+   <bound-workflow workflow_id="UWOshMusicRecruitingWorkFlow" />
+  </type>
+ </bindings>
+</object>

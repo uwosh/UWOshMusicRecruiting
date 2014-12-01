@@ -1,0 +1,9 @@
+[actions]
+action.failure = traverse_to:string:personalize_form
+action.success..Cancel = redirect_to:string:plone_memberprefs_panel
+action.success..PortraitDelete = traverse_to:string:portrait_delete
+action.success = traverse_to:string:personalize
+
+[validators]
+validators = validate_pas_emailaddr, validate_personalize
+validators..Cancel =
